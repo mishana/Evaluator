@@ -19,6 +19,7 @@ import os
 
 from simple_parsing import ArgumentParser
 
+import nemo_evaluator_launcher.cli.config as config
 import nemo_evaluator_launcher.cli.export as export
 import nemo_evaluator_launcher.cli.info as info
 import nemo_evaluator_launcher.cli.kill as kill
@@ -74,14 +75,6 @@ def create_parser() -> ArgumentParser:
         "--verbose",
         action="store_true",
         help="Enable verbose logging (sets LOG_LEVEL=DEBUG)",
-    )
-
-    # Add --no-telemetry flag to disable telemetry
-    parser.add_argument(
-        "-T",
-        "--no-telemetry",
-        action="store_true",
-        help="Disable telemetry for this invocation",
     )
 
     subparsers = parser.add_subparsers(dest="command", required=False)
@@ -177,6 +170,33 @@ def create_parser() -> ArgumentParser:
     )
     ls_task_parser.add_arguments(ls_task.Cmd, dest="task")
 
+    # Config subcommand (with nested subcommands)
+    config_parser = subparsers.add_parser(
+        "config",
+        help="Manage persistent configuration",
+        description="Manage persistent configuration in ~/.config/nemo-evaluator/config.yaml",
+    )
+    config_sub = config_parser.add_subparsers(dest="config_command", required=False)
+
+    config_set_parser = config_sub.add_parser(
+        "set", help="Set a config value", description="Set a config value"
+    )
+    config_set_parser.add_arguments(config.SetCmd, dest="config_set")
+
+    config_get_parser = config_sub.add_parser(
+        "get",
+        help="Get the effective value of a config key",
+        description="Get the effective value of a config key",
+    )
+    config_get_parser.add_arguments(config.GetCmd, dest="config_get")
+
+    config_show_parser = config_sub.add_parser(
+        "show",
+        help="Show the full config file",
+        description="Show the full config file",
+    )
+    config_show_parser.add_arguments(config.ShowCmd, dest="config_show")
+
     # Export subcommand
     export_parser = subparsers.add_parser(
         "export",
@@ -213,12 +233,6 @@ def main() -> None:
     # Handle --verbose flag
     if is_verbose_enabled(args):
         os.environ["LOG_LEVEL"] = "DEBUG"
-
-    # Handle --no-telemetry flag
-    if hasattr(args, "no_telemetry") and args.no_telemetry:
-        from nemo_evaluator.telemetry import TELEMETRY_ENABLED_ENV_VAR
-
-        os.environ[TELEMETRY_ENABLED_ENV_VAR] = "false"
 
     # Handle --version flag
     if hasattr(args, "version") and args.version:
@@ -257,6 +271,17 @@ def main() -> None:
             args.task.execute()
         elif args.ls_command == "runs":
             args.runs.execute()
+    elif args.command == "config":
+        if args.config_command == "set":
+            args.config_set.execute()
+        elif args.config_command == "get":
+            args.config_get.execute()
+        elif args.config_command == "show":
+            args.config_show.execute()
+        else:
+            # No subcommand — print config help
+            parser = create_parser()
+            parser.parse_args(["config", "--help"])
     elif args.command == "export":
         args.export.execute()
     elif args.command == "info":

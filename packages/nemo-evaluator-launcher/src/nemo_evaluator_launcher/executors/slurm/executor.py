@@ -547,8 +547,8 @@ def _create_slurm_sbatch_script(
         endpoint_type=task.get("endpoint_type"),
     )
 
+    from nemo_evaluator.config import TELEMETRY_LEVEL_ENV_VAR
     from nemo_evaluator.telemetry import (
-        TELEMETRY_ENABLED_ENV_VAR,
         TELEMETRY_ENDPOINT_ENV_VAR,
         TELEMETRY_SESSION_ID_ENV_VAR,
     )
@@ -627,7 +627,7 @@ def _create_slurm_sbatch_script(
     # Add telemetry env vars for propagation to containers
     for tel_var in (
         TELEMETRY_SESSION_ID_ENV_VAR,
-        TELEMETRY_ENABLED_ENV_VAR,
+        TELEMETRY_LEVEL_ENV_VAR,
         TELEMETRY_ENDPOINT_ENV_VAR,
     ):
         if os.getenv(tel_var):
@@ -768,7 +768,7 @@ def _create_slurm_sbatch_script(
     # Add telemetry env vars to container env list
     for tel_var in (
         TELEMETRY_SESSION_ID_ENV_VAR,
-        TELEMETRY_ENABLED_ENV_VAR,
+        TELEMETRY_LEVEL_ENV_VAR,
         TELEMETRY_ENDPOINT_ENV_VAR,
     ):
         if os.getenv(tel_var):
@@ -909,15 +909,15 @@ def _generate_auto_export_section(
         launcher_install_cmd = "pip install nemo-evaluator-launcher[all]"
 
     # Propagate telemetry env vars to auto-export job
+    from nemo_evaluator.config import TELEMETRY_LEVEL_ENV_VAR
     from nemo_evaluator.telemetry import (
-        TELEMETRY_ENABLED_ENV_VAR,
         TELEMETRY_ENDPOINT_ENV_VAR,
         TELEMETRY_SESSION_ID_ENV_VAR,
     )
 
     for tel_var in (
         TELEMETRY_SESSION_ID_ENV_VAR,
-        TELEMETRY_ENABLED_ENV_VAR,
+        TELEMETRY_LEVEL_ENV_VAR,
         TELEMETRY_ENDPOINT_ENV_VAR,
     ):
         if os.getenv(tel_var):
