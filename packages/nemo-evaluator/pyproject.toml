@@ -7,10 +7,11 @@ package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["nemo_evaluator", "nemo_evaluator.*"]
+include = ["nemo_evaluator", "nemo_evaluator.*", "core_evals", "core_evals.*"]
 
 [tool.setuptools.package-data]
 nemo_evaluator = ["resources/**/*"]
+"core_evals.nemo_skills" = ["framework.yml"]
 
 [tool.setuptools.dynamic]
 version = { attr = "nemo_evaluator.package_info.__version__" }
